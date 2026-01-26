@@ -38,4 +38,4 @@ Mod Entity Creator Helper
 
 ## Версия
 
-Текущая версия: 1.0.0.0
+Текущая версия: 0.0.1-beta (Public Build)
