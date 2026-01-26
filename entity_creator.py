@@ -2,6 +2,8 @@ import customtkinter as ctk
 import tkinter.messagebox as messagebox
 import tkinter.filedialog as filedialog
 import os
+import json
+import sys
 from PIL import Image
 
 ctk.set_appearance_mode("dark")
@@ -37,7 +39,8 @@ texts = {
         "success": "Entity '{}' successfully created in '{}'!",
         "language": "Language:",
         "english": "English",
-        "russian": "Русский"
+        "russian": "Русский",
+        "close": "Close"
     },
     "ru": {
         "title": "GMod Entity Creator Helper",
@@ -68,7 +71,8 @@ texts = {
         "success": "Сущность '{}' успешно создана в '{}'!",
         "language": "Язык:",
         "english": "English",
-        "russian": "Русский"
+        "russian": "Русский",
+        "close": "Закрыть"
     }
 }
 
@@ -77,6 +81,9 @@ class EntityGenerator(ctk.CTk):
         super().__init__()
 
         self.language = "en"
+
+        self.custom_presets_file = os.path.join(os.path.dirname(sys.executable), "custom_presets.json")
+        self.custom_presets = self.load_custom_presets()
 
         self.title(texts[self.language]["title"])
         self.geometry("600x800")
@@ -128,7 +135,7 @@ class EntityGenerator(ctk.CTk):
 
         self.base_label = ctk.CTkLabel(self.entity_frame, text=texts[self.language]["base_class"], text_color="#cccccc")
         self.base_label.pack(pady=2, padx=10, anchor="w")
-        self.base_class = ctk.CTkOptionMenu(self.entity_frame, values=["base_anim", "base_gmodentity", "base_vehicle", "base_weapon", "other", "custom"])
+        self.base_class = ctk.CTkOptionMenu(self.entity_frame, values=["base_class", "base_vehicle", "weapon_base", "custom"])
         self.base_class.pack(pady=5, padx=10, fill="x")
 
         self.model_label = ctk.CTkLabel(self.entity_frame, text=texts[self.language]["model"], text_color="#cccccc")
@@ -148,6 +155,9 @@ class EntityGenerator(ctk.CTk):
 
         self.custom_base_label = ctk.CTkLabel(self.entity_frame, text=texts[self.language]["custom_base"], text_color="#cccccc")
         self.custom_base = ctk.CTkEntry(self.entity_frame, placeholder_text="e.g., base_myentity")
+        self.saved_custom_label = ctk.CTkLabel(self.entity_frame, text="Saved Presets:", text_color="#cccccc")
+        self.saved_custom = ctk.CTkOptionMenu(self.entity_frame, values=self.custom_presets, command=self.load_custom)
+        self.save_custom_button = ctk.CTkButton(self.entity_frame, text="Save as Preset", command=self.save_custom_preset)
 
         self.base_class.configure(command=self.on_base_class_change)
         self.on_base_class_change(self.base_class.get())  # initial
@@ -250,9 +260,6 @@ class EntityGenerator(ctk.CTk):
         self.preview_title.configure(text=texts[self.language]["code_preview"])
         self.preview_text.delete("0.0", "end")
         self.preview_text.insert("0.0", texts[self.language]["preview_placeholder"])
-        self.language_label.configure(text=texts[self.language]["language"])
-        self.language_menu.configure(values=[texts[self.language]["english"], texts[self.language]["russian"]])
-        self.language_menu.set(texts[self.language]["english"] if self.language == "en" else texts[self.language]["russian"])
         self.custom_functions_label.configure(text=texts[self.language]["custom_functions"])
         self.weapon_damage_label.configure(text=texts[self.language]["weapon_damage"])
         self.ammo_type_label.configure(text=texts[self.language]["ammo_type"])
@@ -261,7 +268,7 @@ class EntityGenerator(ctk.CTk):
         self.settings_button.configure(text="⚙️ " + ("Settings" if self.language == "en" else "Настройки"))
 
     def on_base_class_change(self, value):
-        if value == "base_weapon":
+        if value == "weapon_base":
             self.weapon_damage_label.pack(pady=2, padx=10, anchor="w")
             self.weapon_damage.pack(pady=5, padx=10, fill="x")
             self.ammo_type_label.pack(pady=2, padx=10, anchor="w")
@@ -275,58 +282,50 @@ class EntityGenerator(ctk.CTk):
         if value == "custom":
             self.custom_base_label.pack(pady=2, padx=10, anchor="w")
             self.custom_base.pack(pady=5, padx=10, fill="x")
+            self.saved_custom_label.pack(pady=2, padx=10, anchor="w")
+            self.saved_custom.pack(pady=5, padx=10, fill="x")
+            self.save_custom_button.pack(pady=5, padx=10)
         else:
             self.custom_base_label.pack_forget()
             self.custom_base.pack_forget()
+            self.saved_custom_label.pack_forget()
+            self.saved_custom.pack_forget()
+            self.save_custom_button.pack_forget()
 
-    def animate_button(self, button):
-        original_fg = button.cget("fg_color")
-        button.configure(fg_color="#4CAF50")
-        self.after(300, lambda: button.configure(fg_color=original_fg))
+    def load_custom_presets(self):
+        try:
+            if os.path.exists(self.custom_presets_file):
+                with open(self.custom_presets_file, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+        except:
+            pass
+        return []
 
-    def open_settings(self):
-        settings_window = ctk.CTkToplevel(self)
-        settings_window.title("Settings")
-        settings_window.geometry("300x200")
-        settings_window.resizable(False, False)
+    def save_custom_presets(self):
+        try:
+            with open(self.custom_presets_file, 'w', encoding='utf-8') as f:
+                json.dump(self.custom_presets, f)
+        except:
+            pass
 
-        ctk.CTkLabel(settings_window, text=texts[self.language]["language"], font=ctk.CTkFont(size=14)).pack(pady=10, padx=20, anchor="w")
-        language_menu = ctk.CTkOptionMenu(settings_window, values=[texts[self.language]["english"], texts[self.language]["russian"]], command=lambda selected: self.change_language_from_settings(selected, settings_window))
-        language_menu.set(texts[self.language]["english"] if self.language == "en" else texts[self.language]["russian"])
-        language_menu.pack(pady=5, padx=20, fill="x")
+    def load_custom(self, selected):
+        self.custom_base.delete(0, ctk.END)
+        self.custom_base.insert(0, selected)
 
-        close_button = ctk.CTkButton(settings_window, text="Close", command=settings_window.destroy)
-        close_button.pack(pady=20)
+    def save_custom_preset(self):
+        preset = self.custom_base.get().strip()
+        if preset and preset not in self.custom_presets:
+            self.custom_presets.append(preset)
+            self.save_custom_presets()
+            self.saved_custom.configure(values=self.custom_presets)
 
-    def change_language_from_settings(self, selected, window):
-        self.change_language(selected)
-        window.destroy()
-        self.open_settings()  # reopen to update texts
+    def generate_lua_code(self, name, folder, base, model, custom_code, damage_str, ammo, category, author, spawnable, admin_only):
+        try:
+            damage = int(damage_str.strip()) if damage_str.strip() else 10
+        except ValueError:
+            damage = 10
 
-    def browse_folder(self):
-        folder = filedialog.askdirectory()
-        if folder:
-            self.base_path.delete(0, ctk.END)
-            self.base_path.insert(0, folder)
-
-    def preview_code(self):
-        name = self.ent_name.get().strip() or "My Entity"
-        folder = self.folder_name.get().strip() or "my_entity"
-        base = self.base_class.get()
-        if base == "other":
-            base = "base_gmodentity"
-        elif base == "custom":
-            base = self.custom_base.get().strip() or "base_gmodentity"
-        model = self.model.get().strip() or "models/props_junk/watermelon01.mdl"
-        custom_code = self.custom_functions.get("0.0", "end").strip()
-        damage = self.weapon_damage.get().strip() or "10"
-        ammo = self.ammo_type.get()
-        category = self.category.get().strip() or "My Addon"
-        author = self.author.get().strip() or "Your Name"
-        spawnable = self.spawnable.get()
-        admin_only = self.admin_only.get()
-
-        if base == "base_weapon":
+        if base == "weapon_base":
             shared = f"""-- Shared.lua - Shared weapon properties
 SWEP.Base = "weapon_base"
 SWEP.PrintName = "{name}"
@@ -399,12 +398,12 @@ function ENT:Initialize()
     self:SetUseType(SIMPLE_USE)
 end
 
-function ENT:Use(ply)
-    if not ply:IsPlayer() then return end
-    if ply:GetVehicle() == self then
-        ply:ExitVehicle()
+function ENT:Use(activator, caller)
+    if not activator:IsPlayer() then return end
+    if activator:GetVehicle() == self then
+        activator:ExitVehicle()
     else
-        ply:EnterVehicle(self)
+        activator:EnterVehicle(self)
     end
 end
 
@@ -464,6 +463,55 @@ function ENT:Draw()
 end
 """
 
+        return shared, init, cl_init
+
+    def animate_button(self, button):
+        original_fg = button.cget("fg_color")
+        button.configure(fg_color="#4CAF50")
+        self.after(300, lambda: button.configure(fg_color=original_fg))
+
+    def open_settings(self):
+        settings_window = ctk.CTkToplevel(self)
+        settings_window.title("Settings")
+        settings_window.geometry("300x200")
+        settings_window.resizable(False, False)
+
+        ctk.CTkLabel(settings_window, text=texts[self.language]["language"], font=ctk.CTkFont(size=14)).pack(pady=10, padx=20, anchor="w")
+        language_menu = ctk.CTkOptionMenu(settings_window, values=[texts[self.language]["english"], texts[self.language]["russian"]], command=lambda selected: self.change_language_from_settings(selected, settings_window))
+        language_menu.set(texts[self.language]["english"] if self.language == "en" else texts[self.language]["russian"])
+        language_menu.pack(pady=5, padx=20, fill="x")
+
+        close_button = ctk.CTkButton(settings_window, text=texts[self.language]["close"], command=settings_window.destroy)
+        close_button.pack(pady=20)
+
+    def change_language_from_settings(self, selected, window):
+        self.change_language(selected)
+        window.destroy()
+        self.open_settings()  # reopen to update texts
+
+    def browse_folder(self):
+        folder = filedialog.askdirectory()
+        if folder:
+            self.base_path.delete(0, ctk.END)
+            self.base_path.insert(0, folder)
+
+    def preview_code(self):
+        name = self.ent_name.get().strip() or "My Entity"
+        folder = self.folder_name.get().strip() or "my_entity"
+        base = self.base_class.get()
+        if base == "custom":
+            base = self.custom_base.get().strip() or "base_gmodentity"
+        model = self.model.get().strip() or "models/props_junk/watermelon01.mdl"
+        custom_code = self.custom_functions.get("0.0", "end").strip()
+        damage = self.weapon_damage.get().strip() or "10"
+        ammo = self.ammo_type.get()
+        category = self.category.get().strip() or "My Addon"
+        author = self.author.get().strip() or "Your Name"
+        spawnable = self.spawnable.get()
+        admin_only = self.admin_only.get()
+
+        shared, init, cl_init = self.generate_lua_code(name, folder, base, model, custom_code, damage, ammo, category, author, spawnable, admin_only)
+
         self.preview_text.delete("0.0", "end")
         self.preview_text.insert("0.0", f"shared.lua\n{shared}\n\ninit.lua\n{init}\n\ncl_init.lua\n{cl_init}")
 
@@ -472,9 +520,7 @@ end
         name = self.ent_name.get().strip()
         folder = self.folder_name.get().strip()
         base = self.base_class.get()
-        if base == "other":
-            base = "base_gmodentity"
-        elif base == "custom":
+        if base == "custom":
             base = self.custom_base.get().strip() or "base_gmodentity"
         model = self.model.get().strip() or "models/props_junk/watermelon01.mdl"
         custom_code = self.custom_functions.get("0.0", "end").strip()
@@ -493,149 +539,13 @@ end
         self.progress_bar.set(0.5)
 
         try:
-            script_type = "weapons" if base == "base_weapon" else "entities"
+            script_type = "weapons" if base == "weapon_base" else "entities"
             entity_path = os.path.join(base_path, "lua", script_type, folder)
             os.makedirs(entity_path, exist_ok=True)
         except OSError as e:
             messagebox.showerror("Error" if self.language == "en" else "Ошибка", texts[self.language]["error_create_folder"] + str(e))
             return
-        if base == "base_weapon":
-            shared_template = f"""-- Shared.lua - Shared weapon properties
-SWEP.Base = "weapon_base"
-SWEP.PrintName = "{name}"
-SWEP.Author = "{author}"
-SWEP.Spawnable = {str(bool(spawnable)).lower()}
-SWEP.AdminOnly = {str(bool(admin_only)).lower()}
-SWEP.Category = "{category}"
-SWEP.Purpose = "A custom weapon"
-SWEP.Instructions = "Equip and use as needed"
-SWEP.ViewModel = "models/weapons/v_pistol.mdl"
-SWEP.WorldModel = "{model}"
-
-SWEP.Primary.Damage = {damage}
-SWEP.Primary.Ammo = "{ammo}"
-SWEP.Primary.ClipSize = 30
-SWEP.Primary.DefaultClip = 90
-SWEP.Primary.Automatic = false
-
-function SWEP:Initialize()
-    -- Weapon initialization
-end
-
-function SWEP:PrimaryAttack()
-    -- Primary attack logic
-    self:ShootBullet({damage}, 1, 0.01)
-end
-
-function SWEP:SecondaryAttack()
-    -- Secondary attack logic
-end
-
-{custom_code}
-"""
-
-            init_template = f"""-- Init.lua - Serverside weapon initialization
-include("shared.lua")
-"""
-
-            cl_init_template = f"""-- Cl_init.lua - Clientside weapon rendering
-include("shared.lua")
-"""
-        else:
-            ent_type = "anim"
-
-            if base == "base_vehicle":
-                shared_template = f"""-- Shared.lua - Shared vehicle properties
-ENT.Type = "{ent_type}"
-ENT.Base = "{base}"
-ENT.PrintName = "{name}"
-ENT.Author = "{author}"
-ENT.Spawnable = {str(bool(spawnable)).lower()}
-ENT.AdminOnly = {str(bool(admin_only)).lower()}
-ENT.Category = "{category}"
-ENT.Purpose = "A custom vehicle"
-ENT.Instructions = "Spawn and enter the vehicle"
-"""
-
-                init_template = f"""-- Init.lua - Serverside vehicle initialization
-include("shared.lua")
-
-function ENT:Initialize()
-    self:SetModel("{model}")
-    self:PhysicsInit(SOLID_VPHYSICS)
-    self:SetMoveType(MOVETYPE_VPHYSICS)
-    self:SetSolid(SOLID_VPHYSICS)
-    local phys = self:GetPhysicsObject()
-    if phys:IsValid() then
-        phys:Wake()
-    end
-    self:SetUseType(SIMPLE_USE)
-end
-
-function ENT:Use(ply)
-    if not ply:IsPlayer() then return end
-    if ply:GetVehicle() == self then
-        ply:ExitVehicle()
-    else
-        ply:EnterVehicle(self)
-    end
-end
-
-{custom_code}
-"""
-
-                cl_init_template = f"""-- Cl_init.lua - Clientside vehicle rendering
-include("shared.lua")
-
-function ENT:Draw()
-    self:DrawModel()
-end
-"""
-            else:
-                shared_template = f"""-- Shared.lua - Shared entity properties
-ENT.Type = "{ent_type}"
-ENT.Base = "{base}"
-ENT.PrintName = "{name}"
-ENT.Author = "{author}"
-ENT.Spawnable = {str(bool(spawnable)).lower()}
-ENT.AdminOnly = {str(bool(admin_only)).lower()}
-ENT.Category = "{category}"
-ENT.Purpose = "A custom entity"
-ENT.Instructions = "Spawn and interact as needed"
-"""
-
-                init_template = f"""-- Init.lua - Serverside initialization
-include("shared.lua")
-
-function ENT:Initialize()
-    self:SetModel("{model}")
-    self:PhysicsInit(SOLID_VPHYSICS)
-    self:SetMoveType(MOVETYPE_VPHYSICS)
-    self:SetSolid(SOLID_VPHYSICS)
-    local phys = self:GetPhysicsObject()
-    if phys:IsValid() then
-        phys:Wake()
-    end
-    if {spawnable} == 1 then
-        self:SetUseType(SIMPLE_USE)
-    end
-end
-
-function ENT:Use(activator, caller)
-    -- Add your use logic here
-    -- For example: activator:ChatPrint("You used the entity!")
-end
-
-{custom_code}
-"""
-
-                cl_init_template = f"""-- Cl_init.lua - Clientside rendering
-include("shared.lua")
-
-function ENT:Draw()
-    self:DrawModel()
-end
-"""
+        shared_template, init_template, cl_init_template = self.generate_lua_code(name, folder, base, model, custom_code, damage, ammo, category, author, spawnable, admin_only)
         try:
             with open(os.path.join(entity_path, "shared.lua"), "w", encoding="utf-8") as f:
                 f.write(shared_template)
