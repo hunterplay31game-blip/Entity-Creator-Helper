@@ -192,6 +192,12 @@ class EntityGenerator(ctk.CTk):
         self.settings_button = ctk.CTkButton(self.buttons_frame, text="⚙️ Settings", command=self.open_settings, fg_color="#6c757d", hover_color="#5a6268")
         self.settings_button.pack(side="left", padx=10)
 
+        self.clear_button = ctk.CTkButton(self.buttons_frame, text="🗑️ Clear", command=self.clear_fields, fg_color="#ff6b6b", hover_color="#ff5252")
+        self.clear_button.pack(side="left", padx=10)
+
+        self.export_button = ctk.CTkButton(self.buttons_frame, text="💾 Export Code", command=self.export_code, fg_color="#ffa726", hover_color="#fb8c00")
+        self.export_button.pack(side="left", padx=10)
+
         self.preview_button = ctk.CTkButton(self.buttons_frame, text=texts[self.language]["preview_code"], command=lambda: (self.animate_button(self.preview_button), self.preview_code()), fg_color="#28a745", hover_color="#1e7e34")
         self.preview_button.pack(side="left", padx=10)
 
@@ -562,6 +568,52 @@ end
         self.after(500, lambda: self.progress_bar.pack_forget())
 
         messagebox.showinfo("Success" if self.language == "en" else "Успех", texts[self.language]["success"].format(name, entity_path))
+
+    def clear_fields(self):
+        self.ent_name.delete(0, ctk.END)
+        self.folder_name.delete(0, ctk.END)
+        self.base_class.set("base_class")
+        self.model.delete(0, ctk.END)
+        self.custom_functions.delete("0.0", "end")
+        self.weapon_damage.delete(0, ctk.END)
+        self.ammo_type.set("pistol")
+        self.custom_base.delete(0, ctk.END)
+        self.category.delete(0, ctk.END)
+        self.author.delete(0, ctk.END)
+        self.spawnable.select()
+        self.admin_only.deselect()
+        self.preview_text.delete("0.0", "end")
+        self.preview_text.insert("0.0", texts[self.language]["preview_placeholder"])
+        self.on_base_class_change("base_class")  # reset visibility
+
+    def export_code(self):
+        folder = filedialog.askdirectory()
+        if not folder:
+            return
+        name = self.ent_name.get().strip() or "My Entity"
+        folder_name = self.folder_name.get().strip() or "my_entity"
+        base = self.base_class.get()
+        if base == "custom":
+            base = self.custom_base.get().strip() or "base_gmodentity"
+        model = self.model.get().strip() or "models/props_junk/watermelon01.mdl"
+        custom_code = self.custom_functions.get("0.0", "end").strip()
+        damage = self.weapon_damage.get().strip() or "10"
+        ammo = self.ammo_type.get()
+        category = self.category.get().strip() or "My Addon"
+        author = self.author.get().strip() or "Your Name"
+        spawnable = self.spawnable.get()
+        admin_only = self.admin_only.get()
+        shared, init, cl_init = self.generate_lua_code(name, folder_name, base, model, custom_code, damage, ammo, category, author, spawnable, admin_only)
+        try:
+            with open(os.path.join(folder, "shared.lua"), "w", encoding="utf-8") as f:
+                f.write(shared)
+            with open(os.path.join(folder, "init.lua"), "w", encoding="utf-8") as f:
+                f.write(init)
+            with open(os.path.join(folder, "cl_init.lua"), "w", encoding="utf-8") as f:
+                f.write(cl_init)
+            messagebox.showinfo("Success", f"Code exported to {folder}")
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to export: {e}")
 
 if __name__ == "__main__":
     app = EntityGenerator()
