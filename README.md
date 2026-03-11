@@ -55,4 +55,4 @@ Contributions are welcome! / Вклад приветствуется!
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Version / Версия
-Current version: **0.0.1-beta** (Public Build)
+Current version: **v1.0.0-beta** (Public Build)
