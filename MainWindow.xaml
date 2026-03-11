@@ -1,0 +1,306 @@
+﻿<Window x:Class="GModEntityCreator.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:system="clr-namespace:System;assembly=mscorlib"
+        Title="GMod Entity Creator" Height="900" Width="950"
+        WindowStartupLocation="CenterScreen"
+        Background="#0d0d0d"
+        MinHeight="800" MinWidth="850">
+
+    <Window.Resources>
+        <Style x:Key="CardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#1a1a1a"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="20,12"/>
+            <Setter Property="Padding" Value="25"/>
+        </Style>
+        <Style x:Key="LabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#b0b0b0"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+        <Style x:Key="TitleLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+        </Style>
+        <Style x:Key="InputStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="CaretBrush" Value="White"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="6"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" Margin="0"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="#252525"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#404040"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="6"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"/>
+                            <ContentPresenter Content="{TemplateBinding SelectionBoxItem}"
+                                              VerticalAlignment="Center"
+                                              Margin="12,0,30,0"/>
+                            <ToggleButton HorizontalAlignment="Right"
+                                          Background="Transparent"
+                                          BorderThickness="0"
+                                          Width="30"
+                                          Cursor="Hand">
+                                <Path Data="M0,0 L5,5 L10,0 Z" Fill="White"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                            </ToggleButton>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="ButtonStyle" TargetType="Button">
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,12"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}"
+                                CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.85"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.7"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="70"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="#1a1a1a">
+            <Grid Margin="25,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.Column="0" Width="50" Height="50" CornerRadius="10" Background="#00d4ff">
+                    <TextBlock Text="🎮" FontSize="26" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="20,0,0,0">
+                    <TextBlock Text="GMod Entity Creator" FontSize="26" FontWeight="Bold" Foreground="#00d4ff"/>
+                    <TextBlock Text="Create custom entities and weapons for Garry's Mod" FontSize="12" Foreground="#707070" Margin="0,3,0,0"/>
+                </StackPanel>
+
+                <Button x:Name="LanguageButton" Grid.Column="2" Content="🇬🇧 EN" Style="{StaticResource ButtonStyle}" 
+                        Background="#404040" Click="LanguageButton_Click" Width="90" Height="36"/>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="0,10,10,0">
+            <StackPanel>
+
+                <!-- Addon Folder -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TitleLabelStyle}" x:Name="AddonFolderTitle" Text="📁 Addon Folder"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="130"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="AddonPathTextBox" Style="{StaticResource InputStyle}" 
+                                     Text="E:\Steam\steamapps\common\GarrysMod\garrysmod\addons\myaddon"
+                                     Margin="0,0,12,0"/>
+                            <Button x:Name="BrowseButton" Grid.Column="1" Content="📁 Browse" Style="{StaticResource ButtonStyle}" 
+                                    Background="#0066cc" Click="BrowseButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Entity Properties -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TitleLabelStyle}" x:Name="EntityPropertiesTitle" Text="🎯 Entity Properties"/>
+                        
+                        <TextBlock Style="{StaticResource LabelStyle}" x:Name="EntityNameLabel" Text="Entity Name:"/>
+                        <TextBox x:Name="EntityNameTextBox" Style="{StaticResource InputStyle}" Margin="0,0,0,15"
+                                 Text="My Custom Entity"/>
+                        
+                        <TextBlock Style="{StaticResource LabelStyle}" x:Name="EntityIdLabel" Text="Entity ID (Technical):"/>
+                        <TextBox x:Name="EntityIdTextBox" Style="{StaticResource InputStyle}" Margin="0,0,0,15"
+                                 Text="my_custom_entity"/>
+                        
+                        <TextBlock Style="{StaticResource LabelStyle}" x:Name="BaseClassLabel" Text="Base Class:"/>
+                        <ComboBox x:Name="BaseClassComboBox" Style="{StaticResource ComboBoxStyle}" Margin="0,0,0,15" 
+                                  SelectedIndex="0">
+                            <ComboBox.Items>
+                                <system:String>base_anim</system:String>
+                                <system:String>base_vehicle</system:String>
+                                <system:String>weapon_base</system:String>
+                                <system:String>custom</system:String>
+                            </ComboBox.Items>
+                        </ComboBox>
+                        
+                        <!-- Weapon fields -->
+                        <StackPanel x:Name="WeaponFields">
+                            <TextBlock Style="{StaticResource LabelStyle}" x:Name="WeaponDamageLabel" Text="Base Damage:"/>
+                            <TextBox x:Name="WeaponDamageTextBox" Style="{StaticResource InputStyle}" Margin="0,0,0,15" Text="10"/>
+                            
+                            <TextBlock Style="{StaticResource LabelStyle}" x:Name="AmmoTypeLabel" Text="Ammo Type:"/>
+                            <ComboBox x:Name="AmmoTypeComboBox" Style="{StaticResource ComboBoxStyle}" Margin="0,0,0,15" SelectedIndex="0">
+                                <ComboBox.Items>
+                                    <system:String>pistol</system:String>
+                                    <system:String>smg1</system:String>
+                                    <system:String>ar2</system:String>
+                                    <system:String>buckshot</system:String>
+                                    <system:String>357</system:String>
+                                    <system:String>sniperround</system:String>
+                                </ComboBox.Items>
+                            </ComboBox>
+                        </StackPanel>
+                        
+                        <!-- Custom base fields -->
+                        <StackPanel x:Name="CustomBaseFields">
+                            <TextBlock Style="{StaticResource LabelStyle}" x:Name="CustomBaseLabel" Text="Custom Base:"/>
+                            <Grid Margin="0,0,0,15">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="140"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="CustomBaseTextBox" Style="{StaticResource InputStyle}" Margin="0,0,12,0"/>
+                                <Button x:Name="SavePresetButton" Grid.Column="1" Content="💾 Save Preset" Style="{StaticResource ButtonStyle}" 
+                                        Background="#505050" Click="SavePresetButton_Click"/>
+                            </Grid>
+                            <TextBlock Style="{StaticResource LabelStyle}" x:Name="SavedPresetsLabel" Text="Saved Presets:"/>
+                            <ComboBox x:Name="SavedPresetsComboBox" Style="{StaticResource ComboBoxStyle}" Margin="0,0,0,15"
+                                      SelectionChanged="SavedPresetsComboBox_SelectionChanged"/>
+                        </StackPanel>
+                        
+                        <TextBlock Style="{StaticResource LabelStyle}" x:Name="ModelLabel" Text="Model Path:"/>
+                        <TextBox x:Name="ModelTextBox" Style="{StaticResource InputStyle}" Margin="0,0,0,15"
+                                 Text="models/props_junk/watermelon01.mdl"/>
+                        
+                        <TextBlock Style="{StaticResource LabelStyle}" x:Name="CustomFunctionsLabel" Text="Custom Functions (Lua):"/>
+                        <TextBox x:Name="CustomFunctionsTextBox" Style="{StaticResource InputStyle}" 
+                                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 Height="120" Margin="0,0,0,15" FontFamily="Consolas" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Additional Options -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TitleLabelStyle}" x:Name="AdditionalOptionsTitle" Text="⚙️ Additional Options"/>
+                        
+                        <TextBlock Style="{StaticResource LabelStyle}" x:Name="CategoryLabel" Text="Category:"/>
+                        <TextBox x:Name="CategoryTextBox" Style="{StaticResource InputStyle}" Margin="0,0,0,15"
+                                 Text="My Addon"/>
+                        
+                        <TextBlock Style="{StaticResource LabelStyle}" x:Name="AuthorLabel" Text="Author:"/>
+                        <TextBox x:Name="AuthorTextBox" Style="{StaticResource InputStyle}" Margin="0,0,0,15"
+                                 Text="Your Name"/>
+                        
+                        <StackPanel Margin="0,5,0,0">
+                            <CheckBox x:Name="SpawnableCheckBox" IsChecked="True" Margin="0,8,0,0" Foreground="White" FontSize="14">
+                                <TextBlock Text="Spawnable (available in spawn menu)" Foreground="#b0b0b0"/>
+                            </CheckBox>
+                            <CheckBox x:Name="AdminOnlyCheckBox" Margin="0,8,0,0" Foreground="White" FontSize="14">
+                                <TextBlock Text="Admin Only (restricted to admins)" Foreground="#b0b0b0"/>
+                            </CheckBox>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Code Preview -->
+                <Border Style="{StaticResource CardStyle}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource TitleLabelStyle}" x:Name="CodePreviewTitle" Text="📄 Code Preview"/>
+                        <TextBox x:Name="PreviewTextBox" Style="{StaticResource InputStyle}" 
+                                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                 Height="220" IsReadOnly="True" FontFamily="Consolas" FontSize="12"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer Buttons -->
+        <Border Grid.Row="2" Background="#1a1a1a">
+            <Grid Margin="25,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Button x:Name="ClearButton" Content="🗑️ Clear" Style="{StaticResource ButtonStyle}" 
+                            Background="#cc4444" Click="ClearButton_Click" Width="110" Margin="0,0,12,0"/>
+                    <Button x:Name="ExportButton" Content="💾 Export" Style="{StaticResource ButtonStyle}" 
+                            Background="#cc8833" Click="ExportButton_Click" Width="110"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                    <Button x:Name="PreviewButton" Content="👁️ Preview Code" Style="{StaticResource ButtonStyle}" 
+                            Background="#2e8b4e" Click="PreviewButton_Click" Width="150" Margin="0,0,12,0"/>
+                    <Button x:Name="GenerateButton" Content="📄 Generate Files" Style="{StaticResource ButtonStyle}" 
+                            Background="#cc3344" Click="GenerateButton_Click" Width="160"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Progress Overlay -->
+        <Border x:Name="ProgressOverlay" Grid.Row="1" Background="#80000000" Visibility="Collapsed">
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <ProgressBar x:Name="ProgressBar" Width="300" Height="24" Minimum="0" Maximum="1" 
+                             Value="0.5" IsIndeterminate="True"/>
+                <TextBlock x:Name="ProgressText" Text="Generating files..." Foreground="White" FontSize="15" 
+                           HorizontalAlignment="Center" Margin="0,18,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
